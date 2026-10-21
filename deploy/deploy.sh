@@ -14,7 +14,7 @@ rsync -az --delete \
   --exclude staticfiles --exclude docs --exclude deploy --exclude '__pycache__' \
   "$ROOT/" "$HOST:$DIR/src/"
 rsync -az "$ROOT/deploy/docker-compose.prod.yml" "$HOST:$DIR/docker-compose.yml"
-rsync -az "$ROOT/deploy/apache-repair.conf" "$HOST:$DIR/apache-repair.conf"
+rsync -az "$ROOT/deploy/apache-repair.conf" "$ROOT/deploy/backup.sh" "$HOST:$DIR/"
 
 ssh "$HOST" "cd $DIR && if [ ! -f .env ]; then
   {

@@ -4,6 +4,10 @@
 
 ## 4.1. ER-диаграмма
 
+![ER-диаграмма](img/diagram_er.png)
+
+Исходник диаграммы (Mermaid):
+
 ```mermaid
 erDiagram
   accounts_user ||--o{ repairs_repairrequest : "клиент (client_id)"

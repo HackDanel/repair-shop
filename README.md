@@ -14,6 +14,10 @@
 4. [База данных: ER-диаграмма, таблицы, ограничения](docs/04-database.md)
 5. [Тестирование](docs/05-testing.md)
 6. [Руководство пользователя](docs/06-user-guide.md)
+7. [Техническое описание программы](docs/07-technical.md)
+8. [Развёртывание и сопровождение](docs/08-deployment.md)
+
+Отчёт по практике: [docs/report/](docs/report/).
 
 ## Запуск в Docker (PostgreSQL)
 
