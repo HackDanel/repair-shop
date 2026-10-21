@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+{% load humanize %}
+{% block title %}Услуги и цены{% endblock %}
+{% block content %}
+<section class="hero">
+  <div>
+    <h1>Ремонт техники без очередей</h1>
+    <p>Оставьте заявку онлайн, принесите устройство — и следите за ремонтом в личном кабинете: от диагностики до выдачи.</p>
+    {% if not user.is_authenticated or user.is_client %}
+      <a class="btn" href="{% url 'repairs:create' %}">Оформить заявку</a>
+    {% endif %}
+  </div>
+  <ul class="hero__facts">
+    <li><b>Бесплатно</b> диагностика при ремонте у нас</li>
+    <li><b>от 1 дня</b> срок типового ремонта</li>
+    <li><b>90 дней</b> гарантия на работу</li>
+  </ul>
+</section>
+
+<form class="filters" method="get">
+  <input type="search" name="q" value="{{ query }}" placeholder="Поиск услуги: экран, батарея…" aria-label="Поиск услуги" maxlength="100">
+  <select name="device" aria-label="Тип устройства">
+    <option value="">Все устройства</option>
+    {% for t in device_types %}<option value="{{ t.pk }}"{% if device == t.pk|stringformat:'d' %} selected{% endif %}>{{ t.name }}</option>{% endfor %}
+  </select>
+  <button class="btn btn--ghost">Найти</button>
+</form>
+
+{% for group in groups %}
+  <section class="catalog-group">
+    <h2>{{ group.name }}</h2>
+    <div class="cards">
+      {% for s in group.visible_services %}
+        <article class="card service">
+          <h3>{{ s.name }}</h3>
+          {% if s.description %}<p class="muted">{{ s.description }}</p>{% endif %}
+          <div class="service__meta">
+            <span class="price">от {{ s.price_from|floatformat:0|intcomma }} ₽</span>
+            <span class="muted">{{ s.duration_days }} дн.</span>
+          </div>
+          {% if not user.is_authenticated or user.is_client %}
+            <a class="btn btn--ghost btn--small" href="{% url 'repairs:create' %}?service={{ s.pk }}">Заказать</a>
+          {% endif %}
+        </article>
+      {% endfor %}
+    </div>
+  </section>
+{% empty %}
+  <div class="empty"><p>Ничего не найдено. Попробуйте изменить запрос.</p></div>
+{% endfor %}
+<p class="muted small">Цены ориентировочные: точную стоимость мастер назовёт после диагностики и согласует с вами до начала работ.</p>
+{% endblock %}

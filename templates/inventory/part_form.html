@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+{% block title %}{% if part %}{{ part.name }}{% else %}Новая запчасть{% endif %}{% endblock %}
+{% block content %}
+<div class="narrow card">
+  <h1>{% if part %}Редактирование запчасти{% else %}Новая запчасть{% endif %}</h1>
+  <form method="post" novalidate>
+    {% csrf_token %}
+    {{ form }}
+    <button class="btn">Сохранить</button>
+    <a class="btn btn--ghost" href="{% if part %}{% url 'inventory:detail' part.pk %}{% else %}{% url 'inventory:list' %}{% endif %}">Отмена</a>
+  </form>
+</div>
+{% endblock %}

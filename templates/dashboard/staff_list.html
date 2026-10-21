@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% block title %}Сотрудники{% endblock %}
+{% block content %}
+<div class="page-head">
+  <h1>Сотрудники</h1>
+  <a class="btn" href="{% url 'dashboard:staff_create' %}">Добавить сотрудника</a>
+</div>
+<div class="table-wrap">
+  <table class="table">
+    <thead><tr><th>ФИО</th><th>Логин</th><th>Роль</th><th>Контакты</th><th class="num">В работе</th><th>Статус</th></tr></thead>
+    <tbody>
+    {% for s in staff %}
+      <tr{% if not s.is_active %} class="row--muted"{% endif %}>
+        <td><a href="{% url 'dashboard:staff_edit' s.pk %}">{{ s }}</a></td>
+        <td><code>{{ s.username }}</code></td>
+        <td>{{ s.get_role_display }}</td>
+        <td class="small">{{ s.email }}<br>{{ s.phone }}</td>
+        <td class="num">{{ s.active_requests }}</td>
+        <td>{% if s.is_active %}активен{% else %}отключён{% endif %}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

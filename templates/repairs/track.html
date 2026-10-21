@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+{% block title %}Статус ремонта{% endblock %}
+{% block content %}
+<div class="narrow card">
+  <h1>Заявка №{{ req.number }}</h1>
+  <p class="muted">{{ req.device_type }} {{ req.device_model }} · принята {{ req.created_at|date:'d.m.Y' }}</p>
+  <p>Текущий статус: {% include 'repairs/_badge.html' %}</p>
+  {% include 'repairs/_progress.html' %}
+  <p class="muted small">Обновлено {{ req.updated_at|date:'d.m.Y H:i' }}. Подробности — в личном кабинете.</p>
+</div>
+{% endblock %}

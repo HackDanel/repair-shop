@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% block title %}Журнал склада{% endblock %}
+{% block content %}
+<div class="page-head"><h1>Журнал движений склада</h1></div>
+<nav class="chips">
+  <a class="chip{% if not kind %} is-active{% endif %}" href="?">Все</a>
+  {% for value, label in kinds %}<a class="chip{% if kind == value %} is-active{% endif %}" href="?kind={{ value }}">{{ label }}</a>{% endfor %}
+</nav>
+<div class="table-wrap">
+  <table class="table">
+    <thead><tr><th>Когда</th><th>Запчасть</th><th>Операция</th><th class="num">Кол-во</th><th>Заявка</th><th>Кто</th></tr></thead>
+    <tbody>
+    {% for m in page %}
+      <tr>
+        <td>{{ m.created_at|date:'d.m.Y H:i' }}</td>
+        <td><a href="{% url 'inventory:detail' m.part.pk %}">{{ m.part.name }}</a></td>
+        <td>{{ m.get_kind_display }}</td>
+        <td class="num {% if m.delta > 0 %}pos{% else %}neg{% endif %}">{{ m.delta|stringformat:'+d' }}</td>
+        <td>{% if m.request %}<a href="{% url 'repairs:detail' m.request.pk %}">№{{ m.request.number }}</a>{% endif %}</td>
+        <td>{{ m.author|default:'' }}</td>
+      </tr>
+    {% empty %}
+      <tr><td colspan="6" class="muted">Записей нет.</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% include '_pagination.html' %}
+{% endblock %}

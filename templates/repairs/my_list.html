@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+{% block title %}Мои заявки{% endblock %}
+{% block content %}
+<div class="page-head">
+  <h1>Мои заявки</h1>
+  <a class="btn" href="{% url 'repairs:create' %}">Новая заявка</a>
+</div>
+
+<h2>В работе</h2>
+{% for req in active %}
+  <a class="card req-card" href="{% url 'repairs:detail' req.pk %}">
+    <div class="req-card__head">
+      <b>№{{ req.number }} · {{ req.device_type }} {{ req.device_model }}</b>
+      {% include 'repairs/_badge.html' %}
+    </div>
+    <p class="muted">{{ req.problem|truncatechars:120 }}</p>
+    <span class="small muted">Создана {{ req.created_at|date:'d.m.Y' }}{% if req.master %} · мастер {{ req.master }}{% endif %}</span>
+  </a>
+{% empty %}
+  <div class="empty"><p>Активных заявок нет.</p></div>
+{% endfor %}
+
+{% if history %}
+  <h2>История обращений</h2>
+  <div class="table-wrap">
+    <table class="table">
+      <thead><tr><th>№</th><th>Устройство</th><th>Создана</th><th>Выдана</th><th>Итого</th></tr></thead>
+      <tbody>
+      {% for req in history %}
+        <tr>
+          <td><a href="{% url 'repairs:detail' req.pk %}">{{ req.number }}</a></td>
+          <td>{{ req.device_type }} {{ req.device_model }}</td>
+          <td>{{ req.created_at|date:'d.m.Y' }}</td>
+          <td>{{ req.issued_at|date:'d.m.Y' }}</td>
+          <td>{{ req.total_cost|floatformat:2 }} ₽</td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% endif %}
+{% endblock %}

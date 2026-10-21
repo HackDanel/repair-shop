@@ -1,0 +1,123 @@
+{% extends 'base.html' %}
+{% block title %}Заявка №{{ req.number }}{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div>
+    <h1>Заявка №{{ req.number }}</h1>
+    <p class="muted">{{ req.device_type }} {{ req.device_model }}{% if req.serial_number %} · S/N {{ req.serial_number }}{% endif %}</p>
+  </div>
+  {% include 'repairs/_badge.html' %}
+</div>
+
+{% include 'repairs/_progress.html' %}
+
+<div class="grid-2">
+  <div class="stack">
+    <section class="card">
+      <h2>Неисправность</h2>
+      <p class="pre">{{ req.problem }}</p>
+      {% if req.service %}<p class="muted">Услуга из каталога: {{ req.service.name }} (от {{ req.service.price_from|floatformat:0 }} ₽)</p>{% endif %}
+      {% if photos %}
+        <div class="gallery">
+          {% for p in photos %}
+            <a href="{% url 'repairs:photo' req.pk p.pk %}" target="_blank" rel="noopener">
+              <img src="{% url 'repairs:photo' req.pk p.pk %}" alt="Фото устройства {{ forloop.counter }}" loading="lazy">
+            </a>
+          {% endfor %}
+        </div>
+      {% endif %}
+    </section>
+
+    <section class="card">
+      <h2>Комментарии</h2>
+      {% for c in comments %}
+        <div class="comment{% if c.is_internal %} comment--internal{% endif %}">
+          <div class="comment__head">
+            <b>{{ c.author|default:'—' }}</b>
+            <span class="muted small">{{ c.author.get_role_display }} · {{ c.created_at|date:'d.m.Y H:i' }}</span>
+            {% if c.is_internal %}<span class="tag">внутренний</span>{% endif %}
+          </div>
+          <p class="pre">{{ c.text }}</p>
+        </div>
+      {% empty %}
+        <p class="muted">Комментариев пока нет.</p>
+      {% endfor %}
+      <form method="post" action="{% url 'repairs:add_comment' req.pk %}" class="comment-form">
+        {% csrf_token %}
+        {{ comment_form.text }}
+        {% if not user.is_client %}<label class="check">{{ comment_form.is_internal }} Только для сотрудников</label>{% endif %}
+        <button class="btn btn--small">Отправить</button>
+      </form>
+    </section>
+  </div>
+
+  <div class="stack">
+    <section class="card">
+      <h2>Детали</h2>
+      <dl class="dl">
+        <dt>Клиент</dt><dd>{{ req.client }}{% if not user.is_client %}<br><span class="muted small">{{ req.client.phone }} {{ req.client.email }}</span>{% endif %}</dd>
+        <dt>Мастер</dt><dd>{{ req.master|default:'ещё не назначен' }}</dd>
+        <dt>Создана</dt><dd>{{ req.created_at|date:'d.m.Y H:i' }}</dd>
+        {% if req.issued_at %}<dt>Выдана</dt><dd>{{ req.issued_at|date:'d.m.Y H:i' }}</dd>{% endif %}
+      </dl>
+      {% if assign_form %}
+        <form method="post" action="{% url 'repairs:assign' req.pk %}" class="row-form">
+          {% csrf_token %}{{ assign_form.master }}<button class="btn btn--small">Назначить</button>
+        </form>
+      {% endif %}
+      {% if status_form %}
+        {% if status_form.fields.status.choices %}
+          <form method="post" action="{% url 'repairs:change_status' req.pk %}" class="row-form">
+            {% csrf_token %}{{ status_form.status }}<button class="btn btn--small">Сменить статус</button>
+          </form>
+        {% endif %}
+      {% endif %}
+    </section>
+
+    <section class="card">
+      <h2>Стоимость</h2>
+      {% if usages %}
+        <table class="table table--compact">
+          <thead><tr><th>Запчасть</th><th>Кол-во</th><th>Сумма</th>{% if part_form %}<th></th>{% endif %}</tr></thead>
+          <tbody>
+          {% for u in usages %}
+            <tr>
+              <td>{{ u.part.name }}</td><td>{{ u.quantity }}</td><td>{{ u.total|floatformat:2 }} ₽</td>
+              {% if part_form %}<td>
+                <form method="post" action="{% url 'repairs:return_part' req.pk u.pk %}" data-confirm="Вернуть запчасть на склад?">
+                  {% csrf_token %}<button class="linklike" title="Вернуть на склад">✕</button>
+                </form>
+              </td>{% endif %}
+            </tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      {% endif %}
+      <dl class="dl">
+        <dt>Работа</dt><dd>{{ req.labor_cost|floatformat:2 }} ₽</dd>
+        <dt>Запчасти</dt><dd>{{ req.parts_cost|floatformat:2 }} ₽</dd>
+        <dt><b>Итого</b></dt><dd><b>{{ req.total_cost|floatformat:2 }} ₽</b></dd>
+      </dl>
+      {% if labor_form %}
+        <form method="post" action="{% url 'repairs:set_labor' req.pk %}" class="row-form">
+          {% csrf_token %}{{ labor_form.labor_cost }}<button class="btn btn--small">Сохранить работу</button>
+        </form>
+      {% endif %}
+      {% if part_form %}
+        <form method="post" action="{% url 'repairs:use_part' req.pk %}" class="row-form">
+          {% csrf_token %}{{ part_form.part }}{{ part_form.quantity }}<button class="btn btn--small">Списать</button>
+        </form>
+      {% endif %}
+    </section>
+
+    <section class="card">
+      <h2>История статусов</h2>
+      <ul class="timeline">
+        {% for h in history %}
+          <li><b>{{ h.get_new_status_display }}</b> <span class="muted small">{{ h.created_at|date:'d.m.Y H:i' }}{% if h.author and not user.is_client %} · {{ h.author }}{% endif %}</span></li>
+        {% endfor %}
+      </ul>
+    </section>
+  </div>
+</div>
+{% endblock %}

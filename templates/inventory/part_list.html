@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+{% block title %}Склад{% endblock %}
+{% block content %}
+<div class="page-head">
+  <h1>Склад запчастей</h1>
+  {% if user.is_admin_role %}
+    <div class="actions">
+      <a class="btn btn--ghost" href="{% url 'inventory:movements' %}">Журнал движений</a>
+      <a class="btn" href="{% url 'inventory:create' %}">Добавить запчасть</a>
+    </div>
+  {% endif %}
+</div>
+
+<form class="filters" method="get">
+  <input type="search" name="q" value="{{ query }}" placeholder="Название или артикул" aria-label="Поиск" maxlength="100">
+  <label class="check"><input type="checkbox" name="low" value="1"{% if low %} checked{% endif %}> Только заканчивающиеся ({{ low_count }})</label>
+  <button class="btn btn--ghost">Найти</button>
+</form>
+
+<div class="table-wrap">
+  <table class="table">
+    <thead><tr><th>Артикул</th><th>Название</th><th>Подходит для</th><th class="num">Цена, ₽</th><th class="num">Остаток</th></tr></thead>
+    <tbody>
+    {% for p in page %}
+      <tr{% if p.is_low %} class="row--warn"{% endif %}>
+        <td><code>{{ p.sku }}</code></td>
+        <td><a href="{% url 'inventory:detail' p.pk %}">{{ p.name }}</a></td>
+        <td class="muted">{% for t in p.device_types.all %}{{ t }}{% if not forloop.last %}, {% endif %}{% empty %}универсальная{% endfor %}</td>
+        <td class="num">{{ p.price|floatformat:2 }}</td>
+        <td class="num">{{ p.quantity }}{% if p.is_low %} <span class="tag tag--warn">мало</span>{% endif %}</td>
+      </tr>
+    {% empty %}
+      <tr><td colspan="5" class="muted">Ничего не найдено.</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% include '_pagination.html' %}
+{% endblock %}

@@ -1,0 +1,9 @@
+{% extends 'base.html' %}
+{% block title %}Не найдено{% endblock %}
+{% block content %}
+<div class="empty">
+  <h1>Страница не найдена</h1>
+  <p>Проверьте адрес или вернитесь в каталог услуг.</p>
+  <a class="btn" href="{% url 'catalog:index' %}">На главную</a>
+</div>
+{% endblock %}

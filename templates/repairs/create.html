@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+{% block title %}Новая заявка{% endblock %}
+{% block content %}
+<div class="narrow card">
+  <h1>Заявка на ремонт</h1>
+  <p class="muted">Заполните форму, затем принесите устройство в мастерскую. Статус ремонта будет виден в разделе «Мои заявки».</p>
+  <form method="post" enctype="multipart/form-data" novalidate data-photo-preview>
+    {% csrf_token %}
+    {{ form }}
+    <div class="photo-preview" data-preview></div>
+    <button class="btn btn--wide">Отправить заявку</button>
+  </form>
+</div>
+{% endblock %}

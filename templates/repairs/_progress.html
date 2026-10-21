@@ -1,0 +1,7 @@
+<ol class="progress" aria-label="Этапы ремонта">
+  {% for value, label in steps %}
+    <li class="progress__step{% if forloop.counter0 < req.status_step %} is-done{% elif forloop.counter0 == req.status_step %} is-current{% endif %}">
+      <span class="progress__dot"></span><span class="progress__label">{{ label }}</span>
+    </li>
+  {% endfor %}
+</ol>

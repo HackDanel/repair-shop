@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+{% block title %}Услуги{% endblock %}
+{% block content %}
+<div class="page-head">
+  <h1>Услуги</h1>
+  <a class="btn" href="{% url 'dashboard:service_create' %}">Добавить услугу</a>
+</div>
+<div class="table-wrap">
+  <table class="table">
+    <thead><tr><th>Услуга</th><th>Устройство</th><th class="num">Цена от, ₽</th><th class="num">Срок, дн.</th><th>В каталоге</th></tr></thead>
+    <tbody>
+    {% for s in services %}
+      <tr{% if not s.is_active %} class="row--muted"{% endif %}>
+        <td><a href="{% url 'dashboard:service_edit' s.pk %}">{{ s.name }}</a></td>
+        <td>{{ s.device_type }}</td>
+        <td class="num">{{ s.price_from|floatformat:0 }}</td>
+        <td class="num">{{ s.duration_days }}</td>
+        <td>{% if s.is_active %}да{% else %}скрыта{% endif %}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<h2>Типы устройств</h2>
+<div class="chips">{% for t in device_types %}<span class="chip">{{ t.name }} · {{ t.n }}</span>{% endfor %}</div>
+<form class="row-form narrow" method="post" action="{% url 'dashboard:device_type_create' %}">
+  {% csrf_token %}{{ type_form.name }}<button class="btn btn--small">Добавить тип</button>
+</form>
+{% endblock %}

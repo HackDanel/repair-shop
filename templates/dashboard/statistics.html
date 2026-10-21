@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+{% load humanize static %}
+{% block title %}Статистика{% endblock %}
+{% block content %}
+<div class="page-head"><h1>Статистика</h1></div>
+
+<div class="kpis">
+  <div class="stat"><span class="stat__value">{{ data.kpi.active }}</span><span class="stat__label">заявок в работе</span></div>
+  <div class="stat"><span class="stat__value">{{ data.kpi.ready }}</span><span class="stat__label">ждут выдачи</span></div>
+  <div class="stat{% if data.kpi.unassigned %} stat--warn{% endif %}"><span class="stat__value">{{ data.kpi.unassigned }}</span><span class="stat__label">без мастера</span></div>
+  <div class="stat"><span class="stat__value">{{ data.kpi.revenue_month|floatformat:0|intcomma }} ₽</span><span class="stat__label">доход за месяц</span></div>
+  <div class="stat"><span class="stat__value">{{ data.kpi.avg_days|default:'—' }}</span><span class="stat__label">дней в среднем на ремонт</span></div>
+</div>
+
+<div class="charts">
+  <section class="card"><h2>Заявки по месяцам</h2><div class="chart"><canvas id="ch-requests"></canvas></div></section>
+  <section class="card"><h2>Доход по месяцам, ₽</h2><div class="chart"><canvas id="ch-revenue"></canvas></div></section>
+  <section class="card"><h2>Популярные неисправности</h2><div class="chart"><canvas id="ch-problems"></canvas></div></section>
+  <section class="card"><h2>Загрузка мастеров</h2><div class="chart"><canvas id="ch-masters"></canvas></div></section>
+  <section class="card"><h2>Заявки по устройствам</h2><div class="chart"><canvas id="ch-devices"></canvas></div></section>
+  <section class="card"><h2>Заявки по статусам</h2><div class="chart"><canvas id="ch-statuses"></canvas></div></section>
+</div>
+{{ data.charts|json_script:'stats-data' }}
+{% endblock %}
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script src="{% static 'js/stats.js' %}"></script>
+{% endblock %}

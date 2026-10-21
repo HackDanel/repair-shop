@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+{% block title %}{{ part.name }}{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div>
+    <h1>{{ part.name }}</h1>
+    <p class="muted"><code>{{ part.sku }}</code> · {{ part.price|floatformat:2 }} ₽ · мин. остаток {{ part.min_quantity }}</p>
+  </div>
+  <div class="stat{% if part.is_low %} stat--warn{% endif %}"><span class="stat__value">{{ part.quantity }}</span><span class="stat__label">шт. на складе</span></div>
+</div>
+
+{% if user.is_admin_role %}
+<div class="grid-3">
+  <form class="card" method="post" action="{% url 'inventory:receive' part.pk %}">
+    {% csrf_token %}<h2>Приход</h2>{{ receive_form }}<button class="btn btn--small">Оприходовать</button>
+  </form>
+  <form class="card" method="post" action="{% url 'inventory:adjust' part.pk %}">
+    {% csrf_token %}<h2>Инвентаризация</h2>{{ adjust_form }}<button class="btn btn--small btn--ghost">Исправить остаток</button>
+  </form>
+  <div class="card">
+    <h2>Карточка</h2>
+    <p class="muted">Подходит для: {% for t in part.device_types.all %}{{ t }}{% if not forloop.last %}, {% endif %}{% empty %}любых устройств{% endfor %}</p>
+    <a class="btn btn--small btn--ghost" href="{% url 'inventory:edit' part.pk %}">Редактировать</a>
+  </div>
+</div>
+{% endif %}
+
+<h2>Последние движения</h2>
+<div class="table-wrap">
+  <table class="table">
+    <thead><tr><th>Когда</th><th>Операция</th><th class="num">Кол-во</th><th>Заявка</th><th>Кто</th><th>Примечание</th></tr></thead>
+    <tbody>
+    {% for m in movements %}
+      <tr>
+        <td>{{ m.created_at|date:'d.m.Y H:i' }}</td>
+        <td>{{ m.get_kind_display }}</td>
+        <td class="num {% if m.delta > 0 %}pos{% else %}neg{% endif %}">{{ m.delta|stringformat:'+d' }}</td>
+        <td>{% if m.request %}<a href="{% url 'repairs:detail' m.request.pk %}">№{{ m.request.number }}</a>{% endif %}</td>
+        <td>{{ m.author|default:'' }}</td>
+        <td class="muted">{{ m.note }}</td>
+      </tr>
+    {% empty %}
+      <tr><td colspan="6" class="muted">Движений пока не было.</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

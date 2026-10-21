@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+{% block title %}Клиенты{% endblock %}
+{% block content %}
+<div class="page-head"><h1>Клиенты</h1></div>
+<form class="filters" method="get">
+  <input type="search" name="q" value="{{ query }}" placeholder="Фамилия, e-mail или телефон" aria-label="Поиск" maxlength="100">
+  <button class="btn btn--ghost">Найти</button>
+</form>
+<div class="table-wrap">
+  <table class="table">
+    <thead><tr><th>ФИО</th><th>E-mail</th><th>Телефон</th><th class="num">Заявок</th><th>Зарегистрирован</th><th></th></tr></thead>
+    <tbody>
+    {% for c in page %}
+      <tr{% if not c.is_active %} class="row--muted"{% endif %}>
+        <td>{{ c }}</td><td>{{ c.email }}</td><td>{{ c.phone }}</td>
+        <td class="num"><a href="{% url 'dashboard:requests' %}?q={{ c.email|urlencode }}">{{ c.n }}</a></td>
+        <td>{{ c.date_joined|date:'d.m.Y' }}</td>
+        <td>
+          <form method="post" action="{% url 'dashboard:toggle_active' c.pk %}" data-confirm="{% if c.is_active %}Заблокировать{% else %}Разблокировать{% endif %} клиента?">
+            {% csrf_token %}<button class="btn btn--small btn--ghost">{% if c.is_active %}Заблокировать{% else %}Разблокировать{% endif %}</button>
+          </form>
+        </td>
+      </tr>
+    {% empty %}
+      <tr><td colspan="6" class="muted">Клиентов нет.</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% include '_pagination.html' %}
+{% endblock %}

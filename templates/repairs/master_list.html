@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+{% block title %}Мои ремонты{% endblock %}
+{% block content %}
+<div class="page-head"><h1>{% if user.is_admin_role %}Все ремонты{% else %}Назначенные мне заявки{% endif %}</h1></div>
+
+<nav class="chips">
+  <a class="chip{% if not status %} is-active{% endif %}" href="?">Активные</a>
+  {% for value, label in statuses %}
+    <a class="chip{% if status == value %} is-active{% endif %}" href="?status={{ value }}">{{ label }}</a>
+  {% endfor %}
+</nav>
+
+<div class="table-wrap">
+  <table class="table">
+    <thead><tr><th>№</th><th>Устройство</th><th>Неисправность</th><th>Клиент</th><th>Статус</th><th>Создана</th></tr></thead>
+    <tbody>
+    {% for req in page %}
+      <tr>
+        <td><a href="{% url 'repairs:detail' req.pk %}">{{ req.number }}</a></td>
+        <td>{{ req.device_type }} {{ req.device_model }}</td>
+        <td>{{ req.problem|truncatechars:60 }}</td>
+        <td>{{ req.client }}</td>
+        <td>{% include 'repairs/_badge.html' %}</td>
+        <td>{{ req.created_at|date:'d.m.Y' }}</td>
+      </tr>
+    {% empty %}
+      <tr><td colspan="6" class="muted">Заявок нет.</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% include '_pagination.html' %}
+{% endblock %}
