@@ -47,7 +47,7 @@ def create(request):
 def my_list(request):
     qs = request.user.requests.select_related('device_type', 'master')
     active = qs.exclude(status=Status.ISSUED)
-    history = qs.filter(status=Status.ISSUED)
+    history = qs.filter(status=Status.ISSUED).prefetch_related('part_usages')
     return render(request, 'repairs/my_list.html', {'active': active, 'history': history})
 
 

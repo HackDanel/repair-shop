@@ -4,6 +4,18 @@ from django.db import transaction
 from .models import Part, StockMovement
 
 
+def save_part(form, user):
+    """Сохранить карточку запчасти. Начальный остаток новой запчасти пишется в журнал
+    как приход, чтобы сумма движений всегда совпадала с остатком."""
+    is_new = form.instance.pk is None
+    with transaction.atomic():
+        part = form.save()
+        if is_new and part.quantity > 0:
+            StockMovement.objects.create(part=part, kind=StockMovement.Kind.INCOME, delta=part.quantity,
+                                         author=user, note='Начальный остаток')
+    return part
+
+
 def receive(part_id, quantity, user, note=''):
     """Приход запчастей на склад."""
     if quantity < 1:

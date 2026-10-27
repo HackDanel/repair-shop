@@ -1,4 +1,5 @@
 from django.contrib import messages
+from django.core.exceptions import PermissionDenied
 from django.core.paginator import Paginator
 from django.db.models import Count, Q
 from django.http import JsonResponse
@@ -53,8 +54,12 @@ def staff_list(request):
 
 @admin_required
 def staff_edit(request, pk=None):
-    obj = get_object_or_404(User, pk=pk) if pk else None
-    form = StaffForm(request.POST if request.method == 'POST' else None, instance=obj, initial={'role': User.Role.MASTER})
+    # Здесь редактируются только сотрудники: иначе через форму можно сменить пароль клиенту.
+    obj = get_object_or_404(User, pk=pk, role__in=[User.Role.MASTER, User.Role.ADMIN]) if pk else None
+    if obj is not None and obj.is_superuser and not request.user.is_superuser:
+        raise PermissionDenied
+    form = StaffForm(request.POST if request.method == 'POST' else None, instance=obj,
+                     initial=None if obj else {'role': User.Role.MASTER})
     if request.method == 'POST' and form.is_valid():
         if obj == request.user and (not form.cleaned_data['is_active']
                                     or form.cleaned_data['role'] != User.Role.ADMIN):

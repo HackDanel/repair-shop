@@ -4,18 +4,26 @@
 {% block content %}
 <section class="hero">
   <div>
-    <h1>Ремонт техники без очередей</h1>
-    <p>Оставьте заявку онлайн, принесите устройство — и следите за ремонтом в личном кабинете: от диагностики до выдачи.</p>
+    <p class="eyebrow">Мастерская по ремонту техники</p>
+    <h1>Сдали в ремонт — <em>видите каждый шаг</em></h1>
+    <p>Оформите заявку онлайн, принесите устройство и следите за ремонтом в личном кабинете: от диагностики до выдачи.</p>
     {% if not user.is_authenticated or user.is_client %}
       <a class="btn" href="{% url 'repairs:create' %}">Оформить заявку</a>
     {% endif %}
   </div>
-  <ul class="hero__facts">
-    <li><b>Бесплатно</b> диагностика при ремонте у нас</li>
-    <li><b>от 1 дня</b> срок типового ремонта</li>
-    <li><b>90 дней</b> гарантия на работу</li>
-  </ul>
+  <ol class="steps">
+    <li><div><b>Заявка</b><span>устройство, поломка, фото</span></div></li>
+    <li><div><b>Диагностика и ремонт</b><span>статус и стоимость в кабинете</span></div></li>
+    <li><div><b>Выдача</b><span>забираете, когда статус «Готова»</span></div></li>
+  </ol>
 </section>
+
+<div class="page-head">
+  <div>
+    <p class="eyebrow">Прайс-лист</p>
+    <h1>Услуги и цены</h1>
+  </div>
+</div>
 
 <form class="filters" method="get">
   <input type="search" name="q" value="{{ query }}" placeholder="Поиск услуги: экран, батарея…" aria-label="Поиск услуги" maxlength="100">
@@ -27,23 +35,28 @@
 </form>
 
 {% for group in groups %}
-  <section class="catalog-group">
-    <h2>{{ group.name }}</h2>
-    <div class="cards">
-      {% for s in group.visible_services %}
-        <article class="card service">
-          <h3>{{ s.name }}</h3>
-          {% if s.description %}<p class="muted">{{ s.description }}</p>{% endif %}
-          <div class="service__meta">
-            <span class="price">от {{ s.price_from|floatformat:0|intcomma }} ₽</span>
-            <span class="muted">{{ s.duration_days }} дн.</span>
-          </div>
-          {% if not user.is_authenticated or user.is_client %}
-            <a class="btn btn--ghost btn--small" href="{% url 'repairs:create' %}?service={{ s.pk }}">Заказать</a>
-          {% endif %}
-        </article>
-      {% endfor %}
+  <section class="pricelist">
+    <div class="pricelist__head">
+      <h2>{{ group.name }}</h2>
+      <span>{{ group.visible_services|length }} усл.</span>
     </div>
+    {% for s in group.visible_services %}
+      <div class="pricelist__row">
+        <div>
+          <div class="pricelist__name">{{ s.name }}</div>
+          {% if s.description %}<p class="pricelist__desc">{{ s.description }}</p>{% endif %}
+        </div>
+        <div>
+          <div class="pricelist__price">от {{ s.price_from|floatformat:0|intcomma }} ₽</div>
+          <div class="pricelist__meta">
+            <span>{{ s.duration_days }} дн.</span>
+            {% if not user.is_authenticated or user.is_client %}
+              <a href="{% url 'repairs:create' %}?service={{ s.pk }}">заказать →</a>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    {% endfor %}
   </section>
 {% empty %}
   <div class="empty"><p>Ничего не найдено. Попробуйте изменить запрос.</p></div>

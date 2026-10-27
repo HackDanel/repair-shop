@@ -74,6 +74,10 @@ class RepairRequest(models.Model):
 
     @property
     def parts_cost(self):
+        # В списках запчасти подгружаются prefetch_related — тогда считаем без запроса на каждую заявку.
+        prefetched = getattr(self, '_prefetched_objects_cache', {}).get('part_usages')
+        if prefetched is not None:
+            return sum((u.total for u in prefetched), Decimal('0'))
         total = self.part_usages.aggregate(s=Sum(F('quantity') * F('unit_price')))['s']
         return total or Decimal('0')
 

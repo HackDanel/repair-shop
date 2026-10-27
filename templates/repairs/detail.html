@@ -3,7 +3,8 @@
 {% block content %}
 <div class="page-head">
   <div>
-    <h1>Заявка №{{ req.number }}</h1>
+    <p class="eyebrow">Квитанция</p>
+    <h1>Заявка <span class="ticket-no">№&#8239;{{ req.number }}</span></h1>
     <p class="muted">{{ req.device_type }} {{ req.device_model }}{% if req.serial_number %} · S/N {{ req.serial_number }}{% endif %}</p>
   </div>
   {% include 'repairs/_badge.html' %}
@@ -58,6 +59,7 @@
         <dt>Клиент</dt><dd>{{ req.client }}{% if not user.is_client %}<br><span class="muted small">{{ req.client.phone }} {{ req.client.email }}</span>{% endif %}</dd>
         <dt>Мастер</dt><dd>{{ req.master|default:'ещё не назначен' }}</dd>
         <dt>Создана</dt><dd>{{ req.created_at|date:'d.m.Y H:i' }}</dd>
+        <dt>Статус без входа</dt><dd><a href="{% url 'repairs:track' req.tracking_code %}" class="small">ссылка для проверки</a><br><span class="muted small">её можно отправить или распечатать на квитанции</span></dd>
         {% if req.issued_at %}<dt>Выдана</dt><dd>{{ req.issued_at|date:'d.m.Y H:i' }}</dd>{% endif %}
       </dl>
       {% if assign_form %}

@@ -84,6 +84,12 @@ class CreateRequestTests(TestCase):
         self.assertIn('photos', resp.context['form'].errors)
         self.assertFalse(RepairRequest.objects.exists())
 
+    def test_only_jpeg_png_webp_accepted(self):
+        for fmt, ok in [('TIFF', False), ('BMP', False), ('GIF', False), ('WEBP', True)]:
+            RepairRequest.objects.all().delete()
+            self.client.post(self.url, self.data(photos=[image_file(f'p.{fmt.lower()}', fmt=fmt)]))
+            self.assertEqual(RepairRequest.objects.exists(), ok, fmt)
+
     def test_prefill_from_catalog(self):
         resp = self.client.get(self.url, {'service': self.screen.pk})
         form = resp.context['form']

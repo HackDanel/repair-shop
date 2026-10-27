@@ -4,12 +4,15 @@
 
   const css = getComputedStyle(document.documentElement);
   const color = (name) => css.getPropertyValue(name).trim();
-  const accent = color('--accent');
-  const palette = [accent, '#6366f1', '#f59e0b', '#ec4899', '#0ea5e9', '#84cc16', '#a855f7', '#ef4444'];
+  // Цвета берутся из токенов CSS, поэтому графики сами подстраиваются под тёмную тему.
+  const accent = color('--signal');
+  const ink = color('--ink');
+  const palette = [accent, color('--blue'), color('--amber'), color('--green'), ink, color('--muted'), color('--red'), color('--rule')];
 
   Chart.defaults.color = color('--muted');
-  Chart.defaults.borderColor = color('--border');
-  Chart.defaults.font.family = css.fontFamily;
+  Chart.defaults.borderColor = color('--rule');
+  Chart.defaults.font.family = color('--mono') || css.fontFamily;
+  Chart.defaults.font.size = 11;
   Chart.defaults.maintainAspectRatio = false;
   // Уважаем системную настройку «уменьшить движение».
   if (matchMedia('(prefers-reduced-motion: reduce)').matches) Chart.defaults.animation = false;
@@ -19,13 +22,13 @@
 
   new Chart(document.getElementById('ch-requests'), {
     type: 'bar',
-    data: { labels: data.months, datasets: [{ label: 'Заявок', data: data.requests, backgroundColor: accent, borderRadius: 4 }] },
+    data: { labels: data.months, datasets: [{ label: 'Заявок', data: data.requests, backgroundColor: accent }] },
     options: { ...noLegend, scales: { y: { beginAtZero: true, ticks: { precision: 0 } } } },
   });
 
   new Chart(document.getElementById('ch-revenue'), {
     type: 'line',
-    data: { labels: data.months, datasets: [{ label: 'Доход', data: data.revenue, borderColor: accent, backgroundColor: accent + '33', fill: true, tension: 0.3 }] },
+    data: { labels: data.months, datasets: [{ label: 'Доход', data: data.revenue, borderColor: ink, backgroundColor: color('--signal-soft'), pointBackgroundColor: accent, pointBorderColor: ink, fill: true, tension: 0, borderWidth: 2 }] },
     options: {
       ...noLegend,
       scales: { y: { beginAtZero: true, ticks: { callback: money } } },
@@ -35,7 +38,7 @@
 
   new Chart(document.getElementById('ch-problems'), {
     type: 'bar',
-    data: { labels: data.problems.labels, datasets: [{ label: 'Заявок', data: data.problems.values, backgroundColor: palette[1], borderRadius: 4 }] },
+    data: { labels: data.problems.labels, datasets: [{ label: 'Заявок', data: data.problems.values, backgroundColor: ink }] },
     options: { ...noLegend, indexAxis: 'y', scales: { x: { beginAtZero: true, ticks: { precision: 0 } } } },
   });
 
@@ -44,8 +47,8 @@
     data: {
       labels: data.masters.labels,
       datasets: [
-        { label: 'В работе', data: data.masters.active, backgroundColor: palette[2], borderRadius: 4 },
-        { label: 'Выдано за 30 дней', data: data.masters.done, backgroundColor: accent, borderRadius: 4 },
+        { label: 'В работе', data: data.masters.active, backgroundColor: accent },
+        { label: 'Выдано за 30 дней', data: data.masters.done, backgroundColor: ink },
       ],
     },
     options: { scales: { y: { beginAtZero: true, ticks: { precision: 0 } } } },
@@ -53,13 +56,13 @@
 
   new Chart(document.getElementById('ch-devices'), {
     type: 'doughnut',
-    data: { labels: data.devices.labels, datasets: [{ data: data.devices.values, backgroundColor: palette, borderColor: color('--surface') }] },
+    data: { labels: data.devices.labels, datasets: [{ data: data.devices.values, backgroundColor: palette, borderColor: color('--surface'), borderWidth: 2 }] },
     options: { plugins: { legend: { position: 'right' } } },
   });
 
   new Chart(document.getElementById('ch-statuses'), {
     type: 'bar',
-    data: { labels: data.statuses.labels, datasets: [{ label: 'Заявок', data: data.statuses.values, backgroundColor: palette.slice(0, 5).reverse(), borderRadius: 4 }] },
+    data: { labels: data.statuses.labels, datasets: [{ label: 'Заявок', data: data.statuses.values, backgroundColor: [color('--blue'), color('--amber'), accent, color('--green'), color('--muted')] }] },
     options: { ...noLegend, scales: { y: { beginAtZero: true, ticks: { precision: 0 } } } },
   });
 })();

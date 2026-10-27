@@ -26,13 +26,19 @@ class User(AbstractUser):
     def __str__(self):
         return self.get_full_name() or self.username
 
+    def save(self, *args, **kwargs):
+        # createsuperuser не знает о ролях и оставил бы «Клиента» — суперпользователь всегда администратор.
+        if self.is_superuser:
+            self.role = self.Role.ADMIN
+        super().save(*args, **kwargs)
+
     @property
     def is_client(self):
-        return self.role == self.Role.CLIENT
+        return self.role == self.Role.CLIENT and not self.is_superuser
 
     @property
     def is_master(self):
-        return self.role == self.Role.MASTER
+        return self.role == self.Role.MASTER and not self.is_superuser
 
     @property
     def is_admin_role(self):

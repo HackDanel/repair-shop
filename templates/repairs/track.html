@@ -2,7 +2,8 @@
 {% block title %}Статус ремонта{% endblock %}
 {% block content %}
 <div class="narrow card">
-  <h1>Заявка №{{ req.number }}</h1>
+  <p class="eyebrow">Статус ремонта</p>
+  <h1>Заявка <span class="ticket-no">№&#8239;{{ req.number }}</span></h1>
   <p class="muted">{{ req.device_type }} {{ req.device_model }} · принята {{ req.created_at|date:'d.m.Y' }}</p>
   <p>Текущий статус: {% include 'repairs/_badge.html' %}</p>
   {% include 'repairs/_progress.html' %}

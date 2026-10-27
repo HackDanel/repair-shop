@@ -10,7 +10,7 @@
 {% for req in active %}
   <a class="card req-card" href="{% url 'repairs:detail' req.pk %}">
     <div class="req-card__head">
-      <b>№{{ req.number }} · {{ req.device_type }} {{ req.device_model }}</b>
+      <b><span class="ticket-no">№&#8239;{{ req.number }}</span> · {{ req.device_type }} {{ req.device_model }}</b>
       {% include 'repairs/_badge.html' %}
     </div>
     <p class="muted">{{ req.problem|truncatechars:120 }}</p>

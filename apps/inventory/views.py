@@ -32,7 +32,7 @@ def part_edit(request, pk=None):
     part = get_object_or_404(Part, pk=pk) if pk else None
     form = PartForm(request.POST if request.method == 'POST' else None, instance=part)
     if request.method == 'POST' and form.is_valid():
-        part = form.save()
+        part = services.save_part(form, request.user)
         messages.success(request, f'Запчасть «{part.name}» сохранена.')
         return redirect('inventory:detail', pk=part.pk)
     return render(request, 'inventory/part_form.html', {'form': form, 'part': part})

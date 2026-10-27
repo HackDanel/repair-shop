@@ -13,6 +13,9 @@ class MultipleImageInput(forms.ClearableFileInput):
     allow_multiple_selected = True
 
 
+ALLOWED_PHOTO_FORMATS = {'JPEG', 'PNG', 'WEBP'}
+
+
 class MultipleImageField(forms.ImageField):
     """ImageField, принимающий несколько файлов. Каждый проверяется Pillow."""
 
@@ -28,7 +31,11 @@ class MultipleImageField(forms.ImageField):
         for f in files:
             if f.size > settings.MAX_PHOTO_SIZE:
                 raise ValidationError(f'Файл «{f.name}» больше {settings.MAX_PHOTO_SIZE // 1024 // 1024} МБ.')
-            cleaned.append(super().clean(f, initial))
+            image = super().clean(f, initial)
+            # Pillow открывает и TIFF, и PSD; разрешаем только то, что покажет любой браузер.
+            if getattr(image, 'image', None) is None or image.image.format not in ALLOWED_PHOTO_FORMATS:
+                raise ValidationError(f'Файл «{f.name}»: допустимы только JPEG, PNG и WebP.')
+            cleaned.append(image)
         return cleaned
 
 

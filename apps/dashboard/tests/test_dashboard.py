@@ -134,3 +134,36 @@ class StatsTests(TestCase):
         self.assertEqual(data['kpi']['unassigned'], 1)
         self.assertEqual(len(data['charts']['months']), 12)
         self.assertEqual(data['charts']['masters'], {'labels': [str(master)], 'active': [0], 'done': [1]})
+
+
+class StaffEditRegressionTests(TestCase):
+    """Найдено на код-ревью: роль перетиралась на «Мастер», можно было сменить пароль суперпользователю."""
+
+    def setUp(self):
+        self.admin = make_user('boss', role=User.Role.ADMIN)
+        self.client.force_login(self.admin)
+
+    def test_edit_form_shows_current_role(self):
+        other = make_user('boss2', role=User.Role.ADMIN)
+        form = self.client.get(reverse('dashboard:staff_edit', args=[other.pk])).context['form']
+        self.assertEqual(form['role'].value(), User.Role.ADMIN)
+        own = self.client.get(reverse('dashboard:staff_edit', args=[self.admin.pk])).context['form']
+        self.assertEqual(own['role'].value(), User.Role.ADMIN)
+
+    def test_role_admin_cannot_edit_superuser(self):
+        root = make_user('root', is_superuser=True, is_staff=True)
+        resp = self.client.post(reverse('dashboard:staff_edit', args=[root.pk]), {
+            'username': 'root', 'email': 'root@test.local', 'role': 'admin', 'is_active': 'on', 'password': 'Hacked-pass-42',
+        })
+        self.assertEqual(resp.status_code, 403)
+        root.refresh_from_db()
+        self.assertFalse(root.check_password('Hacked-pass-42'))
+
+    def test_clients_are_not_editable_as_staff(self):
+        c = make_user('c')
+        self.assertEqual(self.client.get(reverse('dashboard:staff_edit', args=[c.pk])).status_code, 404)
+
+    def test_superuser_gets_admin_role(self):
+        root = User.objects.create_superuser('root2', 'root2@test.local', PASSWORD)
+        self.assertEqual(root.role, User.Role.ADMIN)
+        self.assertFalse(root.is_client)

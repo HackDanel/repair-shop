@@ -58,7 +58,9 @@ class StockViewsTests(TestCase):
         self.client.force_login(self.admin)
         data = {'sku': ' bat-01 ', 'name': 'Батарея', 'price': '1200', 'quantity': 4, 'min_quantity': 1}
         self.client.post(reverse('inventory:create'), data)
-        self.assertTrue(Part.objects.filter(sku='BAT-01').exists())
+        part = Part.objects.get(sku='BAT-01')
+        # Начальный остаток попадает в журнал, сумма движений совпадает с остатком.
+        self.assertEqual(sum(part.movements.values_list('delta', flat=True)), part.quantity)
         resp = self.client.post(reverse('inventory:create'), data)
         self.assertIn('sku', resp.context['form'].errors)
 

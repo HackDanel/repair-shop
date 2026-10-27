@@ -25,4 +25,5 @@ ssh "$HOST" "cd $DIR && if [ ! -f .env ]; then
   } > .env
   chmod 600 .env
 fi
-docker compose up -d --build 2>&1 | tail -3"
+# Полный лог в файл, на экран — хвост; при ошибке сборки скрипт завершается с ошибкой.
+if docker compose up -d --build > deploy.log 2>&1; then tail -3 deploy.log; else tail -30 deploy.log; exit 1; fi"
